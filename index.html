@@ -1066,7 +1066,7 @@
       try { state.nes.stop(); } catch (e) { console.warn('Stop error:', e); }
     }
 
-    state.nes = new jsnes({ onFrame: onFrame, onAudioSample: onAudioSample });
+      state.nes = new jsnes.NES({ onFrame: onFrame, onAudioSample: onAudioSample });
     initAudio();
     resumeAudio();
 
