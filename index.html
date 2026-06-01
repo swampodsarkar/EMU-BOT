@@ -756,7 +756,7 @@
           <div class="sidebar-section">
             <div class="sidebar-title">// SYSTEM INFO</div>
             <div style="font-size:0.7rem;color:var(--text-dim);line-height:1.6">
-              <div>ENGINE: jsNES 1.2</div>
+              <div>ENGINE: jsnes 1.2</div>
               <div>CANVAS: 256×240</div>
               <div id="game-status">STATUS: INITIALIZING</div>
             </div>
@@ -831,7 +831,7 @@
       <div style="padding:30px;max-width:800px;margin:0 auto;width:100%">
         <h2 style="color:var(--neon-cyan);text-shadow:0 0 15px var(--neon-cyan);margin-bottom:20px;letter-spacing:3px">// SYSTEM SPECS</h2>
         <div style="background:var(--bg-panel);border:1px solid var(--border-glow);padding:20px;border-radius:4px;line-height:1.8;font-size:0.85rem;color:var(--text-dim)">
-          <div>◈ NES EMULATION: jsNES 1.2 (JS-based)</div>
+          <div>◈ NES EMULATION: jsnes 1.2 (JS-based)</div>
           <div>◈ RENDERING: Canvas 2D / WebGL fallback</div>
           <div>◈ AUDIO: Web Audio API (44100Hz stereo)</div>
           <div>◈ INPUT: Keyboard + Touch + Gamepad</div>
@@ -864,13 +864,13 @@
 (function() {
   'use strict';
 
-  if (typeof jsNES === 'undefined') {
+  if (typeof jsnes === 'undefined') {
     setTimeout(function() {
       var emuStage = document.getElementById('emulator-stage');
       if (emuStage) {
         emuStage.innerHTML = '<div style="color:#ff0044;text-align:center;padding:40px;font-family:monospace">' +
           '<div style="font-size:2rem;margin-bottom:15px">⚠ EMULATOR LOAD FAILED</div>' +
-          '<div style="color:#8888bb;font-size:0.8rem;margin-bottom:20px">jsNES library failed to load from CDN.<br>Check internet connection and refresh.</div>' +
+          '<div style="color:#8888bb;font-size:0.8rem;margin-bottom:20px">jsnes library failed to load from CDN.<br>Check internet connection and refresh.</div>' +
           '<button onclick="location.reload()" style="padding:10px 20px;background:rgba(0,240,255,0.1);border:1px solid #00f0ff;color:#00f0ff;cursor:pointer;border-radius:3px;font-family:monospace">🔄 RETRY</button></div>';
       }
     }, 2000);
@@ -908,15 +908,15 @@
   var BTN_RIGHT = null;
 
   function initKeys() {
-    if (!jsNES) return;
-    BTN_A = jsNES.Controller.BUTTON_A;
-    BTN_B = jsNES.Controller.BUTTON_B;
-    BTN_START = jsNES.Controller.BUTTON_START;
-    BTN_SELECT = jsNES.Controller.BUTTON_SELECT;
-    BTN_UP = jsNES.Controller.BUTTON_UP;
-    BTN_DOWN = jsNES.Controller.BUTTON_DOWN;
-    BTN_LEFT = jsNES.Controller.BUTTON_LEFT;
-    BTN_RIGHT = jsNES.Controller.BUTTON_RIGHT;
+    if (!jsnes) return;
+    BTN_A = jsnes.Controller.BUTTON_A;
+    BTN_B = jsnes.Controller.BUTTON_B;
+    BTN_START = jsnes.Controller.BUTTON_START;
+    BTN_SELECT = jsnes.Controller.BUTTON_SELECT;
+    BTN_UP = jsnes.Controller.BUTTON_UP;
+    BTN_DOWN = jsnes.Controller.BUTTON_DOWN;
+    BTN_LEFT = jsnes.Controller.BUTTON_LEFT;
+    BTN_RIGHT = jsnes.Controller.BUTTON_RIGHT;
     KEYS_NES = {
       'ArrowUp': BTN_UP,
       'ArrowDown': BTN_DOWN,
@@ -1054,7 +1054,7 @@
   }
 
   function loadROM(arrayBuffer, fileName) {
-    if (typeof jsNES === 'undefined') {
+    if (typeof jsnes === 'undefined') {
       toast('ERROR: Emulator engine not loaded. Check internet connection.');
       return;
     }
@@ -1066,7 +1066,7 @@
       try { state.nes.stop(); } catch (e) { console.warn('Stop error:', e); }
     }
 
-    state.nes = new jsNES({ onFrame: onFrame, onAudioSample: onAudioSample });
+    state.nes = new jsnes({ onFrame: onFrame, onAudioSample: onAudioSample });
     initAudio();
     resumeAudio();
 
