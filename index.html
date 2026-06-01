@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0014">
+<meta name="description" content="RetroGaming - Classic Emulator Hub with NES, Arcade Games & Cyberpunk UI">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RetroGaming">
+<title>RetroGaming // NEXUS</title>
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;RetroGaming&quot;,&quot;short_name&quot;:&quot;RetroGaming&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%230a0014&quot;,&quot;theme_color&quot;:&quot;%230a0014&quot;,&quot;icons&quot;:[]}">
+<style>
+  :root {
+    --bg-deep: #0a0014;
+    --bg-panel: #12001f;
+    --bg-screen: #000000;
+    --neon-cyan: #00f0ff;
+    --neon-magenta: #ff00ff;
+    --neon-yellow: #faff00;
+    --neon-green: #00ff9f;
+    --neon-orange: #ff6a00;
+    --text-primary: #e0e0ff;
+    --text-dim: #8888bb;
+    --border-glow: #4400aa;
+    --danger: #ff0044;
+    --font-main: 'Courier New', 'Consolas', monospace;
+    --font-display: 'Impact', 'Arial Black', sans-serif;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at top, #1a0033 0%, transparent 60%),
+      radial-gradient(ellipse at bottom right, #200040 0%, transparent 60%),
+      linear-gradient(180deg, #0a0014 0%, #05000a 100%);
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.015) 2px, rgba(0, 240, 255, 0.015) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.8), rgba(68,0,170,0.3), rgba(0,0,0,0.8));
+    border-bottom: 1px solid var(--border-glow);
+    box-shadow: 0 0 20px rgba(68,0,170,0.4), inset 0 -1px 0 rgba(0, 240, 255, 0.2);
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px rgba(0,240,255,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--neon-cyan), inset 0 0 10px rgba(0,240,255,0.3);
+    position: relative;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .logo-icon::after {
+    content: '▶';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--neon-cyan);
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px var(--neon-cyan); }
+    50% { box-shadow: 0 0 25px var(--neon-cyan), 0 0 40px var(--neon-cyan); }
+  }
+
+  .header-controls {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .header-btn {
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: var(--neon-cyan);
+    padding: 6px 14px;
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .header-btn:hover {
+    background: rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0,240,255,0.4);
+    border-color: var(--neon-cyan);
+  }
+
+  .header-btn.active {
+    background: var(--neon-cyan);
+    color: var(--bg-deep);
+    box-shadow: 0 0 20px var(--neon-cyan);
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    gap: 2px;
+    padding: 10px 20px 0;
+    background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(68,0,170,0.5);
+    flex-shrink: 0;
+  }
+
+  .tab {
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .tab:hover {
+    color: var(--neon-cyan);
+  }
+
+  .tab.active {
+    color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.05);
+    border-color: rgba(0, 240, 255, 0.3);
+    border-bottom: 1px solid var(--bg-deep);
+    margin-bottom: -1px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.2), inset 0 -2px 0 var(--neon-cyan);
+  }
+
+  .tab::before {
+    content: '// ';
+    opacity: 0.5;
+  }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tab-content {
+    display: none;
+    height: 100%;
+    overflow: auto;
+  }
+
+  .tab-content.active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* EMULATOR TAB */
+  .emulator-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .emulator-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen-wrapper {
+    position: relative;
+    background: #000;
+    border: 2px solid var(--border-glow);
+    box-shadow:
+      0 0 30px rgba(68,0,170,0.6),
+      0 0 60px rgba(0,240,255,0.2),
+      inset 0 0 40px rgba(0,0,0,0.8);
+    border-radius: 4px;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 256/240;
+  }
+
+  .screen-wrapper.fullscreen-mode {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    border: none;
+    border-radius: 0;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: auto;
+    background: #000;
+  }
+
+  .screen-wrapper.fullscreen-mode canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #emulator-canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    width: 100%;
+    height: 100%;
+    background: #000;
+  }
+
+  .screen-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.9);
+    z-index: 10;
+    color: var(--neon-cyan);
+    text-align: center;
+    padding: 20px;
+    pointer-events: auto;
+  }
+
+  .screen-overlay.hidden {
+    display: none;
+  }
+
+  .screen-overlay.drag-over {
+    background: rgba(0, 240, 255, 0.1);
+    border: 3px dashed var(--neon-cyan);
+  }
+
+  .drop-zone-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .drop-zone-text {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+  }
+
+  .drop-zone-sub {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .fps-counter {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: var(--neon-green);
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    font-family: var(--font-main);
+    border-radius: 2px;
+    z-index: 5;
+    border: 1px solid rgba(0,255,159,0.3);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 280px;
+    background: var(--bg-panel);
+    border-left: 1px solid rgba(68,0,170,0.4);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section {
+    padding: 15px;
+    border-bottom: 1px solid rgba(68,0,170,0.3);
+  }
+
+  .sidebar-title {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--neon-magenta);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-shadow: 0 0 8px var(--neon-magenta);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0,240,255,0.08);
+    border: 1px solid rgba(0,240,255,0.3);
+    color: var(--neon-cyan);
+    font-family: var(--font-main);
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-bottom: 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .btn:hover {
+    background: rgba(0,240,255,0.2);
+    box-shadow: 0 0 15px rgba(0,240,255,0.3);
+  }
+
+  .btn.magenta {
+    background: rgba(255,0,255,0.08);
+    border-color: rgba(255,0,255,0.3);
+    color: var(--neon-magenta);
+  }
+
+  .btn.magenta:hover {
+    background: rgba(255,0,255,0.2);
+    box-shadow: 0 0 15px rgba(255,0,255,0.3);
+  }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn-row .btn {
+    flex: 1;
+  }
+
+  .game-list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .game-list li {
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.3);
+    margin-bottom: 4px;
+    border-left: 3px solid var(--neon-cyan);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .game-list li:hover {
+    background: rgba(0,240,255,0.1);
+    border-left-color: var(--neon-magenta);
+    box-shadow: 0 0 10px rgba(0,240,255,0.2);
+  }
+
+  .game-list li .del-game {
+    opacity: 0;
+    color: var(--danger);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    padding: 0 4px;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+    margin-left: 5px;
+  }
+
+  .game-list li:hover .del-game {
+    opacity: 1;
+  }
+
+  .recent-empty {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    font-style: italic;
+    padding: 10px 0;
+  }
+
+  /* FILE INPUT */
+  #rom-input {
+    display: none;
+  }
+
+  /* MOBILE CONTROLS */
+  .mobile-controls {
+    display: none;
+    padding: 10px;
+    gap: 10px;
+    width: 100%;
+    background: rgba(0,0,0,0.6);
+    border-top: 1px solid var(--border-glow);
+    flex-shrink: 0;
+  }
+
+  .dpad {
+    display: grid;
+    grid-template-columns: 40px 40px 40px;
+    grid-template-rows: 40px 40px 40px;
+    gap: 3px;
+  }
+
+  .ctrl-btn {
+    background: rgba(0,240,255,0.1);
+    border: 1px solid rgba(0,240,255,0.4);
+    color: var(--neon-cyan);
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    transition: all 0.1s;
+  }
+
+  .ctrl-btn:active, .ctrl-btn.pressed {
+    background: rgba(0,240,255,0.5);
+    box-shadow: 0 0 15px var(--neon-cyan);
+    transform: scale(0.95);
+  }
+
+  .dpad .up { grid-column: 2; grid-row: 1; }
+  .dpad .left { grid-column: 1; grid-row: 2; }
+  .dpad .center { grid-column: 2; grid-row: 2; background: transparent; border: none; font-size: 0.7rem; color: var(--text-dim); }
+  .dpad .right { grid-column: 3; grid-row: 2; }
+  .dpad .down { grid-column: 2; grid-row: 3; }
+
+  .action-btns {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .ab-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .btn-a { background: rgba(255,0,255,0.15); border-color: rgba(255,0,255,0.5); color: var(--neon-magenta); }
+  .btn-b { background: rgba(255,106,0,0.15); border-color: rgba(255,106,0,0.5); color: var(--neon-orange); }
+
+  .meta-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .meta-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    background: rgba(250,255,0,0.08);
+    border: 1px solid rgba(250,255,0,0.3);
+    color: var(--neon-yellow);
+  }
+
+  .controls-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  /* ARCADE TAB */
+  .arcade-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+  }
+
+  .arcade-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glow);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(68,0,170,0.3);
+  }
+
+  .arcade-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 30px rgba(0,240,255,0.5), 0 10px 30px rgba(0,0,0,0.5);
+    border-color: var(--neon-cyan);
+  }
+
+  .arcade-preview {
+    height: 160px;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    border-bottom: 1px solid var(--border-glow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .arcade-preview canvas {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .arcade-info {
+    padding: 12px;
+  }
+
+  .arcade-title {
+    font-weight: bold;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+    letter-spacing: 1px;
+    font-size: 0.95rem;
+  }
+
+  .arcade-desc {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .arcade-play-btn {
+    margin-top: 10px;
+    padding: 6px;
+    background: rgba(0,255,159,0.1);
+    border: 1px solid var(--neon-green);
+    color: var(--neon-green);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .arcade-play-btn:hover {
+    background: rgba(0,255,159,0.3);
+    box-shadow: 0 0 15px rgba(0,255,159,0.4);
+  }
+
+  /* ARCADE MODAL */
+  .arcade-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 20000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .arcade-modal.active {
+    display: flex;
+  }
+
+  .arcade-modal canvas {
+    border: 2px solid var(--neon-green);
+    box-shadow: 0 0 40px rgba(0,255,159,0.4);
+    max-width: 100%;
+    max-height: 70vh;
+    image-rendering: pixelated;
+  }
+
+  .arcade-close {
+    margin-top: 15px;
+    padding: 10px 30px;
+    background: rgba(255,0,68,0.15);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    cursor: pointer;
+    font-family: var(--font-main);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 3px;
+  }
+
+  /* AD PLACEHOLDERS */
+  .ad-banner {
+    width: 100%;
+    height: 60px;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .ad-popup-slot {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed rgba(255,255,255,0.1);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    z-index: 5000;
+    border-radius: 4px;
+  }
+
+  /* NOTIFICATIONS */
+  .toast {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: var(--bg-panel);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    z-index: 15000;
+    border-radius: 3px;
+    box-shadow: 0 0 20px rgba(0,240,255,0.4);
+    animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.5s forwards;
+    pointer-events: none;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-10px); }
+  }
+
+  /* SCROLLBARS */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+  ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+
+    .emulator-layout {
+      flex-direction: column;
+    }
+
+    .mobile-controls {
+      display: flex;
+    }
+
+    .tab {
+      padding: 8px 12px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+    }
+
+    .header-btn {
+      padding: 6px 10px;
+      font-size: 0.7rem;
+    }
+
+    .arcade-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .logo {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tab-bar { padding: 8px 10px 0; }
+    .tab { padding: 7px 10px; font-size: 0.65rem; }
+    .arcade-grid { grid-template-columns: 1fr; }
+  }
+
+  /* LOADING ANIMATION */
+  .loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0,240,255,0.3);
+    border-top-color: var(--neon-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .pause-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--neon-magenta);
+    text-shadow: 0 0 20px var(--neon-magenta);
+    letter-spacing: 5px;
+    pointer-events: none;
+  }
+
+  .pause-overlay.active {
+    display: flex;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <span>RETRO://NEXUS</span>
+    </div>
+    <div class="header-controls">
+      <button class="header-btn" id="btn-fps" title="Toggle FPS">FPS</button>
+      <button class="header-btn" id="btn-fullscreen" title="Fullscreen">⛶</button>
+      <button class="header-btn" id="btn-install" title="Install PWA" style="display:none">⬇ PWA</button>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="emulator">EMULATOR</button>
+    <button class="tab" data-tab="arcade">ARCADE</button>
+    <button class="tab" data-tab="about">SYSTEM</button>
+  </nav>
+
+  <main>
+    <!-- EMULATOR TAB -->
+    <div class="tab-content active" id="tab-emulator">
+      <div class="emulator-layout">
+        <div class="emulator-stage" id="emulator-stage">
+          <div class="screen-wrapper" id="screen-wrapper">
+            <canvas id="emulator-canvas" width="256" height="240"></canvas>
+            <div class="fps-counter hidden" id="fps-counter">0 FPS</div>
+            <div class="pause-overlay" id="pause-overlay">⏸ PAUSED</div>
+            <div class="screen-overlay" id="screen-overlay">
+              <div class="drop-zone-icon">🕹️</div>
+              <div class="drop-zone-text">DROP ROM FILE HERE</div>
+              <div class="drop-zone-sub">or click button below to load</div>
+              <button class="btn" style="margin-top:20px;width:auto;padding:12px 30px" id="btn-browse">📂 BROWSE ROM</button>
+              <input type="file" id="rom-input" accept=".nes,.zip,.gb,.gbc,.gba">
+            </div>
+          </div>
+        </div>
+
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-section">
+            <div class="sidebar-title">// CONTROLS</div>
+            <button class="btn" id="btn-pause">⏸ Pause</button>
+            <button class="btn" id="btn-reset">↺ Reset</button>
+            <div class="btn-row" style="margin-top:4px">
+              <button class="btn" id="btn-save">💾 Save</button>
+              <button class="btn" id="btn-load">📂 Load</button>
+            </div>
+            <button class="btn" id="btn-screenshot" style="margin-top:4px">📸 Screenshot</button>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">// KEY MAPPING</div>
+            <div style="font-size:0.7rem;color:var(--text-dim);line-height:1.6">
+              <div>ARROWS = D-PAD</div>
+              <div>Z = A • X = B</div>
+              <div>ENTER = START</div>
+              <div>SHIFT = SELECT</div>
+              <div>SPACE = Turbo A</div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">// RECENT ROOMS</div>
+            <ul class="game-list" id="recent-list">
+              <li class="recent-empty">No games loaded yet</li>
+            </ul>
+            <button class="btn magenta" id="btn-clear-recent" style="margin-top:8px">✕ CLEAR HISTORY</button>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">// SYSTEM INFO</div>
+            <div style="font-size:0.7rem;color:var(--text-dim);line-height:1.6">
+              <div>ENGINE: jsNES 1.2</div>
+              <div>CANVAS: 256×240</div>
+              <div id="game-status">STATUS: IDLE</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="mobile-controls" id="mobile-controls">
+        <div class="controls-row">
+          <div class="dpad">
+            <button class="ctrl-btn up" data-key="ArrowUp">▲</button>
+            <button class="ctrl-btn left" data-key="ArrowLeft">◀</button>
+            <div class="ctrl-btn center">NES</div>
+            <button class="ctrl-btn right" data-key="ArrowRight">▶</button>
+            <button class="ctrl-btn down" data-key="ArrowDown">▼</button>
+          </div>
+
+          <div class="meta-btns">
+            <button class="ctrl-btn meta-btn" data-key="Shift">SELECT</button>
+            <button class="ctrl-btn meta-btn" data-key="Enter" style="background:rgba(250,255,0,0.15);border-color:rgba(250,255,0,0.5);color:var(--neon-yellow)">START</button>
+          </div>
+
+          <div class="action-btns">
+            <button class="ctrl-btn ab-btn btn-b" data-key="x">B</button>
+            <button class="ctrl-btn ab-btn btn-a" data-key="z">A</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARCADE TAB -->
+    <div class="tab-content" id="tab-arcade">
+      <div class="arcade-grid">
+        <div class="arcade-card" data-game="snake">
+          <div class="arcade-preview" style="font-size:2rem;background:linear-gradient(135deg,#0a0014,#1a0033)">🐍 SNAKE</div>
+          <div class="arcade-info">
+            <div class="arcade-title">SNAKE</div>
+            <div class="arcade-desc">Classic snake - arrows to move, eat food, grow longer</div>
+            <button class="arcade-play-btn" data-launch="snake">▶ PLAY NOW</button>
+          </div>
+        </div>
+
+        <div class="arcade-card" data-game="pong">
+          <div class="arcade-preview" style="font-size:2rem;background:linear-gradient(135deg,#001a0a,#003310)">🏓 PONG</div>
+          <div class="arcade-info">
+            <div class="arcade-title">PONG</div>
+            <div class="arcade-desc">Classic paddle game - W/S or touch controls</div>
+            <button class="arcade-play-btn" data-launch="pong">▶ PLAY NOW</button>
+          </div>
+        </div>
+
+        <div class="arcade-card" data-game="breakout">
+          <div class="arcade-preview" style="font-size:2rem;background:linear-gradient(135deg,#1a0500,#331100)">🧱 BREAKOUT</div>
+          <div class="arcade-info">
+            <div class="arcade-title">BREAKOUT</div>
+            <div class="arcade-desc">Break all bricks - mouse or left/right to move paddle</div>
+            <button class="arcade-play-btn" data-launch="breakout">▶ PLAY NOW</button>
+          </div>
+        </div>
+
+        <div class="arcade-card" data-game="tetris">
+          <div class="arcade-preview" style="font-size:2rem;background:linear-gradient(135deg,#0a0a1a,#111133)">🧩 TETRIS</div>
+          <div class="arcade-info">
+            <div class="arcade-title">TETRIS</div>
+            <div class="arcade-desc">Stack blocks - arrows to move/rotate, space to drop</div>
+            <button class="arcade-play-btn" data-launch="tetris">▶ PLAY NOW</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT TAB -->
+    <div class="tab-content" id="tab-about">
+      <div style="padding:30px;max-width:800px;margin:0 auto;width:100%">
+        <h2 style="color:var(--neon-cyan);text-shadow:0 0 15px var(--neon-cyan);margin-bottom:20px;letter-spacing:3px">// SYSTEM SPECS</h2>
+        <div style="background:var(--bg-panel);border:1px solid var(--border-glow);padding:20px;border-radius:4px;line-height:1.8;font-size:0.85rem;color:var(--text-dim)">
+          <div>◈ NES EMULATION: jsNES 1.2 (JS-based)</div>
+          <div>◈ RENDERING: Canvas 2D / WebGL fallback</div>
+          <div>◈ AUDIO: Web Audio API (44100Hz stereo)</div>
+          <div>◈ INPUT: Keyboard + Touch + Gamepad</div>
+          <div>◈ STORAGE: LocalStorage (saves, history)</div>
+          <div>◈ PWA: Service Worker enabled</div>
+          <div>◈ OFFLINE: Full UI shell cached</div>
+          <div style="margin-top:15px;color:var(--neon-magenta);text-shadow:0 0 8px var(--neon-magenta)">
+            ⚠ LEGAL NOTE: You must supply your own ROMs. No ROMs are included with this software.
+          </div>
+          <div style="margin-top:10px;font-size:0.75rem;opacity:0.7">
+            Made with ❤️ for retro gaming preservation. Support homebrew and open-source game communities.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ARCADE MODAL -->
+<div class="arcade-modal" id="arcade-modal">
+  <canvas id="arcade-canvas" width="400" height="400"></canvas>
+  <button class="arcade-close" id="arcade-close">✕ CLOSE</button>
+  <div id="arcade-score" style="color:var(--neon-green);margin-top:8px;font-size:0.9rem;letter-spacing:2px">SCORE: 0</div>
+</div>
+
+<!-- AD POPUP -->
+<div class="ad-popup-slot" id="ad-popup">[ AD SLOT ]</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsnes@1.2.0/dist/jsnes.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  const state = {
+    nes: null,
+    audioCtx: null,
+    audioScript: null,
+    audioNode: null,
+    isRunning: false,
+    isPaused: false,
+    frameCount: 0,
+    lastFpsTime: performance.now(),
+    fps: 0,
+    showFps: false,
+    romName: null,
+    romData: null,
+    saveData: null,
+    animFrame: null,
+    keyState: {},
+    turboActive: false,
+    turboTimer: null,
+    currentArcade: null,
+    arcadeRaf: null,
+  };
+
+  const KEYS = {
+    'ArrowUp': jsnes.Controller.BUTTON_UP,
+    'ArrowDown': jsnes.Controller.BUTTON_DOWN,
+    'ArrowLeft': jsnes.Controller.BUTTON_LEFT,
+    'ArrowRight': jsnes.Controller.BUTTON_RIGHT,
+    'z': jsnes.Controller.BUTTON_A,
+    'x': jsnes.Controller.BUTTON_B,
+    'Enter': jsnes.Controller.BUTTON_START,
+    'Shift': jsnes.Controller.BUTTON_SELECT,
+  };
+
+  // ============================================================
+  // DOM REFS
+  // ============================================================
+  const $ = (id) => document.getElementById(id);
+  const canvas = $('emulator-canvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = $('screen-overlay');
+  const screenWrapper = $('screen-wrapper');
+  const fpsEl = $('fps-counter');
+  const pauseOverlay = $('pause-overlay');
+  const romInput = $('rom-input');
+  const statusEl = $('game-status');
+  const recentList = $('recent-list');
+  const fpsBtn = $('btn-fps');
+  const fullscreenBtn = $('btn-fullscreen');
+  const pauseBtn = $('btn-pause');
+  const adPopup = $('ad-popup');
+
+  // ============================================================
+  // PWA
+  // ============================================================
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    const swCode = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  }
+
+  let deferredPrompt;
+  $('btn-install').addEventListener('click', () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(r => { if (r.outcome === 'accepted') $('btn-install').style.display = 'none'; });
+    }
+  });
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    $('btn-install').style.display = 'inline-block';
+  });
+
+  // ============================================================
+  // TAB NAVIGATION
+  // ============================================================
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      $('tab-' + tab.dataset.tab).classList.add('active');
+      if (tab.dataset.tab !== 'emulator' && state.isRunning) {
+        // keep running in background
+      }
+    });
+  });
+
+  // ============================================================
+  // NOTIFICATIONS
+  // ============================================================
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = '> ' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // ============================================================
+  // AUDIO ENGINE
+  // ============================================================
+  function initAudio() {
+    if (state.audioCtx) return;
+    try {
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+      state.audioScript = state.audioCtx.createScriptProcessor(2048, 0, 2);
+      state.audioScript.onaudioprocess = (e) => {
+        if (!state.nes || !state.isRunning || state.isPaused) {
+          e.outputBuffer.getChannelData(0).fill(0);
+          e.outputBuffer.getChannelData(1).fill(0);
+          return;
+        }
+        const buf = state.nes.audio();
+        if (!buf || !buf.length) {
+          e.outputBuffer.getChannelData(0).fill(0);
+          e.outputBuffer.getChannelData(1).fill(0);
+          return;
+        }
+        const left = e.outputBuffer.getChannelData(0);
+        const right = e.outputBuffer.getChannelData(1);
+        const len = Math.min(buf.length, left.length);
+        for (let i = 0; i < len; i++) {
+          left[i] = right[i] = buf[i] / 32768;
+        }
+        if (len < left.length) {
+          for (let i = len; i < left.length; i++) left[i] = right[i] = 0;
+        }
+      };
+      state.audioScript.connect(state.audioCtx.destination);
+      state.audioNode = state.audioCtx.createGain();
+      state.audioNode.gain.value = 0.5;
+      state.audioNode.connect(state.audioScript);
+    } catch (e) {
+      console.warn('Audio init failed:', e);
+    }
+  }
+
+  function resumeAudio() {
+    if (state.audioCtx && state.audioCtx.state === 'suspended') {
+      state.audioCtx.resume();
+    }
+  }
+
+  // ============================================================
+  // ROM LOADING
+  // ============================================================
+  function loadROM(arrayBuffer, fileName) {
+    const data = new Uint8Array(arrayBuffer);
+    const mapper = detectMapper(data);
+    const romName = fileName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9 _-]/g, '');
+
+    if (state.nes) {
+      try { state.nes.stop(); } catch (e) {}
+    }
+
+    if (!state.nes) {
+      state.nes = new jsNES({ onFrame, onAudioSample });
+    }
+
+    initAudio();
+    resumeAudio();
+
+    try {
+      state.nes.loadROM(data);
+      state.romData = data;
+      state.romName = romName;
+      state.isRunning = true;
+      state.isPaused = false;
+      state.saveData = null;
+
+      overlay.classList.add('hidden');
+      pauseOverlay.classList.remove('active');
+      updateStatus('RUNNING: ' + romName.toUpperCase());
+
+      addRecent(romName);
+      startLoop();
+
+      toast('LOADED: ' + romName);
+    } catch (e) {
+      toast('ERROR: ' + e.message);
+      console.error(e);
+    }
+  }
+
+  function detectMapper(data) {
+    let mapperNum = 0;
+    if (data.length > 7) {
+      mapperNum = ((data[6] >> 4) & 0x0F) | (data[7] & 0xF0);
+    }
+    if (data.length > 7) {
+      mapperNum = ((data[6] >> 4) & 0x0F) | ((data[7] & 0xF0));
+    }
+    // Clean mapper extraction
+    const lo = data[6] >> 4;
+    const hi = data[7] & 0xF0;
+    return Math.min(lo | (hi >>> 4), 255);
+  }
+
+  function onFrame(buffer) {
+    const img = ctx.createImageData(256, 240);
+    for (let i = 0; i < 256 * 240; i++) {
+      img.data[i * 4] = buffer[i * 4];
+      img.data[i * 4 + 1] = buffer[i * 4 + 1];
+      img.data[i * 4 + 2] = buffer[i * 4 + 2];
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function onAudioSample(left, right) {
+    // Handled via audio engine
+  }
+
+  // ============================================================
+  // GAME LOOP
+  // ============================================================
+  function startLoop() {
+    if (state.animFrame) cancelAnimationFrame(state.animFrame);
+    function tick() {
+      if (!state.isRunning) return;
+      if (!state.isPaused) {
+        try {
+          state.nes.frame();
+        } catch (e) {
+          // ignore frame errors
+        }
+      }
+      state.frameCount++;
+      const now = performance.now();
+      if (now - state.lastFpsTime >= 1000) {
+        state.fps = state.frameCount;
+        state.frameCount = 0;
+        state.lastFpsTime = now;
+        if (state.showFps && fpsEl) {
+          fpsEl.textContent = state.fps + ' FPS';
+        }
+      }
+      if (state.showFps && fpsEl) {
+        fpsEl.textContent = state.fps + ' FPS';
+      }
+      state.animFrame = requestAnimationFrame(tick);
+    }
+    state.animFrame = requestAnimationFrame(tick);
+  }
+
+  function updateStatus(text) {
+    if (statusEl) statusEl.textContent = 'STATUS: ' + text;
+  }
+
+  // ============================================================
+  // CONTROLS
+  // ============================================================
+  window.addEventListener('keydown', (e) => {
+    if (state.nes) {
+      const btn = KEYS[e.key];
+      if (btn !== undefined) {
+        e.preventDefault();
+        if (!state.keyState[e.key]) {
+          state.nes.buttonDown(1, btn);
+          state.keyState[e.key] = true;
+
+          if (e.key === 'z' || e.key === 'Z') {
+            state.turboActive = true;
+            state.turboTimer = setInterval(() => {
+              if (state.nes && state.isRunning && !state.isPaused) {
+                state.nes.buttonDown(1, jsnes.Controller.BUTTON_A);
+                setTimeout(() => state.nes.buttonUp(1, jsnes.Controller.BUTTON_A), 50);
+              }
+            }, 120);
+          }
+        }
+      }
+
+      // Shortcuts
+      if (e.key === 'p' || e.key === 'P') togglePause();
+      if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (state.nes) {
+      const btn = KEYS[e.key];
+      if (btn !== undefined) {
+        e.preventDefault();
+        state.nes.buttonUp(1, btn);
+        state.keyState[e.key] = false;
+      }
+      if (e.key === 'z' || e.key === 'Z') {
+        state.turboActive = false;
+        if (state.turboTimer) clearInterval(state.turboTimer);
+      }
+    }
+  });
+
+  // Mobile touch controls
+  document.querySelectorAll('.ctrl-btn[data-key]').forEach(btn => {
+    const key = btn.dataset.key;
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      btn.classList.add('pressed');
+      if (state.nes && key) {
+        const mapped = KEYS[key] || (key === 'z' ? jsnes.Controller.BUTTON_A : key === 'x' ? jsnes.Controller.BUTTON_B : undefined);
+        if (mapped) state.nes.buttonDown(1, mapped);
+      }
+    });
+    btn.addEventListener('pointerup', (e) => {
+      e.preventDefault();
+      btn.classList.remove('pressed');
+      if (state.nes && key) {
+        const mapped = KEYS[key] || (key === 'z' ? jsnes.Controller.BUTTON_A : key === 'x' ? jsnes.Controller.BUTTON_B : undefined);
+        if (mapped) state.nes.buttonUp(1, mapped);
+      }
+    });
+    btn.addEventListener('pointerleave', () => btn.classList.remove('pressed'));
+  });
+
+  // ============================================================
+  // BUTTON HANDLERS
+  // ============================================================
+  $('btn-browse').addEventListener('click', () => romInput.click());
+  romInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => loadROM(e.target.result, file.name);
+    reader.readAsArrayBuffer(file);
+  }
+
+  // Drag and drop
+  const stage = $('emulator-stage');
+  stage.addEventListener('dragover', (e) => { e.preventDefault(); overlay.classList.add('drag-over'); });
+  stage.addEventListener('dragleave', () => overlay.classList.remove('drag-over'));
+  stage.addEventListener('drop', (e) => {
+    e.preventDefault();
+    overlay.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  // Pause
+  function togglePause() {
+    if (!state.isRunning) return;
+    state.isPaused = !state.isPaused;
+    pauseBtn.textContent = state.isPaused ? '▶ Resume' : '⏸ Pause';
+    pauseOverlay.classList.toggle('active', state.isPaused);
+    updateStatus(state.isPaused ? 'PAUSED' : 'RUNNING');
+  }
+  $('btn-pause').addEventListener('click', togglePause);
+
+  // Reset
+  $('btn-reset').addEventListener('click', () => {
+    if (state.nes && state.romData) {
+      state.nes.loadROM(state.romData);
+      state.isPaused = false;
+      state.saveData = null;
+      pauseBtn.textContent = '⏸ Pause';
+      pauseOverlay.classList.remove('active');
+      updateStatus('RESET: ' + state.romName);
+      toast('RESET');
+    }
+  });
+
+  // Save / Load state
+  $('btn-save').addEventListener('click', () => {
+    if (!state.nes || !state.isRunning) { toast('NO GAME RUNNING'); return; }
+    try {
+      const saveStr = state.nes.serialize();
+      state.saveData = saveStr;
+      localStorage.setItem('nes_save_' + state.romName, saveStr);
+      updateStatus('SAVED: ' + state.romName);
+      toast('STATE SAVED');
+    } catch (e) {
+      toast('SAVE FAILED: ' + e.message);
+    }
+  });
+
+  $('btn-load').addEventListener('click', () => {
+    if (!state.nes || !state.isRunning) { toast('NO GAME RUNNING'); return; }
+    const saveStr = state.saveData || localStorage.getItem('nes_save_' + state.romName);
+    if (!saveStr) { toast('NO SAVE FOUND'); return; }
+    try {
+      state.nes.deserialize(saveStr);
+      updateStatus('LOADED: SAVE STATE');
+      toast('STATE LOADED');
+    } catch (e) {
+      toast('LOAD FAILED: ' + e.message);
+    }
+  });
+
+  // Screenshot
+  $('btn-screenshot').addEventListener('click', () => {
+    if (!state.nes) { toast('NO GAME RUNNING'); return; }
+    const link = document.createElement('a');
+    link.download = (state.romName || 'nes') + '_' + Date.now() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    toast('SCREENSHOT SAVED');
+  });
+
+  // FPS toggle
+  fpsBtn.addEventListener('click', () => {
+    state.showFps = !state.showFps;
+    fpsBtn.classList.toggle('active', state.showFps);
+    fpsEl.classList.toggle('hidden', !state.showFps);
+    if (!state.showFps) fpsEl.textContent = '0 FPS';
+  });
+
+  // Fullscreen
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      screenWrapper.classList.add('fullscreen-mode');
+      const rfs = screenWrapper.requestFullscreen || screenWrapper.webkitRequestFullscreen;
+      if (rfs) rfs.call(screenWrapper).catch(() => screenWrapper.classList.remove('fullscreen-mode'));
+    } else {
+      screenWrapper.classList.remove('fullscreen-mode');
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) exit.call(document);
+    }
+  }
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) screenWrapper.classList.remove('fullscreen-mode');
+  });
+
+  // ============================================================
+  // RECENT GAMES (LOCALSTORAGE)
+  // ============================================================
+  function getRecent() {
+    try { return JSON.parse(localStorage.getItem('nes_recent') || '[]'); } catch { return []; }
+  }
+
+  function addRecent(name) {
+    const list = getRecent().filter(n => n !== name);
+    list.unshift(name);
+    const trimmed = list.slice(0, 20);
+    localStorage.setItem('nes_recent', JSON.stringify(trimmed));
+    renderRecent();
+  }
+
+  function removeRecent(name) {
+    const list = getRecent().filter(n => n !== name);
+    localStorage.setItem('nes_recent', JSON.stringify(list));
+    renderRecent();
+  }
+
+  function renderRecent() {
+    const list = getRecent();
+    if (list.length === 0) {
+      recentList.innerHTML = '<li class="recent-empty">No games loaded yet</li>';
+      return;
+    }
+    recentList.innerHTML = list.map(n => `<li><span>${escapeHtml(n)}</span><button class="del-game" data-name="${escapeHtml(n)}">×</button></li>`).join('');
+    recentList.querySelectorAll('.del-game').forEach(b => {
+      b.addEventListener('click', (e) => { e.stopPropagation(); removeRecent(b.dataset.name); });
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  }
+
+  $('btn-clear-recent').addEventListener('click', () => {
+    localStorage.removeItem('nes_recent');
+    renderRecent();
+  });
+
+  renderRecent();
+
+  // ============================================================
+  // ARCADE GAMES
+  // ============================================================
+  const arcadeCanvas = $('arcade-canvas');
+  const arcadeCtx = arcadeCanvas.getContext('2d');
+
+  $('arcade-close').addEventListener('click', closeArcade);
+
+  function openArcade(game) {
+    state.currentArcade = game;
+    $('arcade-modal').classList.add('active');
+    startArcade(game);
+  }
+
+  function closeArcade() {
+    $('arcade-modal').classList.remove('active');
+    if (state.arcadeRaf) cancelAnimationFrame(state.arcadeRaf);
+    state.arcadeRaf = null;
+    state.currentArcade = null;
+  }
+
+  function startArcade(game) {
+    if (state.arcadeRaf) cancelAnimationFrame(state.arcadeRaf);
+    if (game === 'snake') initSnake();
+    else if (game === 'pong') initPong();
+    else if (game === 'breakout') initBreakout();
+    else if (game === 'tetris') initTetris();
+  }
+
+  document.querySelectorAll('[data-launch]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openArcade(btn.dataset.launch);
+    });
+  });
+  document.querySelectorAll('.arcade-card').forEach(card => {
+    card.addEventListener('click', () => openArcade(card.dataset.game));
+  });
+
+  // ============================================================
+  // SNAKE
+  // ============================================================
+  function initSnake() {
+    const W = 400, H = 400, S = 20;
+    let snake = [{x:10,y:10}], dir={x:1,y:0}, nextDir={x:1,y:0}, food=spawnFood(), score=0, speed=120, last=0, running=true;
+
+    function spawnFood() {
+      return { x: Math.floor(Math.random()*W/S), y: Math.floor(Math.random()*H/S) };
+    }
+
+    window.addEventListener('keydown', snakeHandler, {once:false});
+    // Remove old by storing handler ref
+    window._snakeHandler = snakeHandler;
+    function snakeHandler(e) {
+      const k = e.key;
+      if (k==='ArrowUp' && dir.y!==1) nextDir={x:0,y:-1};
+      else if (k==='ArrowDown' && dir.y!==-1) nextDir={x:0,y:1};
+      else if (k==='ArrowLeft' && dir.x!==1) nextDir={x:-1,y:0};
+      else if (k==='ArrowRight' && dir.x!==-1) nextDir={x:1,y:0};
+    }
+
+    function draw() {
+      arcadeCtx.fillStyle='#0a0014';
+      arcadeCtx.fillRect(0,0,W,H);
+      arcadeCtx.strokeStyle='rgba(0,240,255,0.1)';
+      arcadeCtx.lineWidth=1;
+      for(let i=0;i<W;i+=S){arcadeCtx.beginPath();arcadeCtx.moveTo(i,0);arcadeCtx.lineTo(i,H);arcadeCtx.stroke();}
+      for(let j=0;j<H;j+=S){arcadeCtx.beginPath();arcadeCtx.moveTo(0,j);arcadeCtx.lineTo(W,j);arcadeCtx.stroke();}
+
+      arcadeCtx.shadowColor='#00ff9f';
+      arcadeCtx.shadowBlur=10;
+      arcadeCtx.fillStyle='#00ff9f';
+      snake.forEach(s => arcadeCtx.fillRect(s.x*S+1, s.y*S+1, S-2, S-2));
+      arcadeCtx.shadowBlur=0;
+
+      arcadeCtx.shadowColor='#ff00ff';
+      arcadeCtx.shadowBlur=15;
+      arcadeCtx.fillStyle='#ff00ff';
+      arcadeCtx.fillRect(food.x*S+2, food.y*S+2, S-4, S-4);
+      arcadeCtx.shadowBlur=0;
+
+      $('arcade-score').textContent = 'SCORE: ' + score;
+    }
+
+    function update(ts) {
+      if (!state.currentArcade || state.currentArcade !== 'snake') {
+        if (window._snakeHandler) window.removeEventListener('keydown', snakeHandler);
+        return;
+      }
+      state.arcadeRaf = requestAnimationFrame(update);
+      if (!running || ts - last < speed) { return; if(running) draw(); return; }
+      last = ts;
+      dir = nextDir;
+      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+      if (head.x < 0 || head.y < 0 || head.x >= W/S || head.y >= H/S || snake.some(s => s.x === head.x && s.y === head.y)) {
+        running = false;
+        toast('GAME OVER - SCORE: ' + score);
+        return;
+      }
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        score += 10;
+        food = spawnFood();
+        speed = Math.max(50, speed - 2);
+      } else {
+        snake.pop();
+      }
+      draw();
+    }
+    state.arcadeRaf = requestAnimationFrame(update);
+    draw();
+  }
+
+  // ============================================================
+  // PONG
+  // ============================================================
+  function initPong() {
+    const W=400, H=400;
+    let p1=H/2-30, p2=H/2-30, bx=W/2, by=H/2, bvx=4, bvy=2, s1=0, s2=0, keys={};
+
+    window._pongHandler = e => {
+      if(e.key==='w'||e.key==='ArrowUp') keys.up=true;
+      if(e.key==='s'||e.key==='ArrowDown') keys.down=true;
+    };
+    window.addEventListener('keydown', window._pongHandler);
+    window._pongHandlerUp = e => {
+      if(e.key==='w'||e.key==='ArrowUp') keys.up=false;
+      if(e.key==='s'||e.key==='ArrowDown') keys.down=false;
+    };
+    window.addEventListener('keyup', window._pongHandlerUp);
+
+    function update() {
+      if (!state.currentArcade || state.currentArcade !== 'pong') {
+        window.removeEventListener('keydown', window._pongHandler);
+        window.removeEventListener('keyup', window._pongHandlerUp);
+        return;
+      }
+      state.arcadeRaf = requestAnimationFrame(update);
+      if (keys.up) p1 -= 5;
+      if (keys.down) p1 += 5;
+      p1 = Math.max(0, Math.min(H-60, p1));
+      p2 = by - 30;
+      p2 = Math.max(0, Math.min(H-60, p2));
+
+      bx += bvx; by += bvy;
+      if (by<0||by>H) bvy *= -1;
+      if (bx<20 && by>p1 && by<p1+60) { bvx *= -1.05; }
+      if (bx>W-20 && by>p2 && by<p2+60) { bvx *= -1.05; }
+      if (bx<0) { s2++; bx=W/2; bvx=4; }
+      if (bx>W) { s1++; bx=W/2; bvx=-4; }
+
+      arcadeCtx.fillStyle='#000'; arcadeCtx.fillRect(0,0,W,H);
+      arcadeCtx.fillStyle='#00ff9f'; arcadeCtx.fillRect(10, p1, 8, 60);
+      arcadeCtx.fillRect(W-18, p2, 8, 60);
+      arcadeCtx.fillStyle='#fff'; arcadeCtx.fillRect(W/2-1, 0, 2, H);
+      arcadeCtx.shadowColor='#fff'; arcadeCtx.shadowBlur=10; arcadeCtx.fillRect(bx, by, 8, 8); arcadeCtx.shadowBlur=0;
+      arcadeCtx.fillStyle='#00f0ff'; arcadeCtx.font='bold 20px Courier New';
+      arcadeCtx.fillText(s1, W/2-40, 30); arcadeCtx.fillText(s2, W/2+30, 30);
+      $('arcade-score').textContent = 'YOU: ' + s1 + '  AI: ' + s2;
+    }
+    state.arcadeRaf = requestAnimationFrame(update);
+  }
+
+  // ============================================================
+  // BREAKOUT
+  // ============================================================
+  function initBreakout() {
+    const W=400, H=400;
+    let px=W/2-30, bx=W/2, by=H-30, bvx=3, bvy=-3;
+    let bricks=[];
+    for(let r=0;r<5;r++) for(let c=0;c<8;c++) bricks.push({x:c*50+5,y:r*20+40,w:45,h:15,alive:true});
+    const colors=['#ff0044','#ff6a00','#faff00','#00ff9f','#00f0ff'];
+    let score=0;
+
+    function update() {
+      if (!state.currentArcade || state.currentArcade !== 'breakout') return;
+      state.arcadeRaf = requestAnimationFrame(update);
+      if (keys.left) px -= 5;
+      if (keys.right) px += 5;
+      px = Math.max(0, Math.min(W-60, px));
+
+      bx += bvx; by += bvy;
+      if (bx<0||bx>W) bvx *= -1;
+      if (by<0) bvy *= -1;
+      if (by>H-20 && bx>px && bx<px+60) {
+        bvy = -Math.abs(bvy);
+        const rel = (bx - (px+30)) / 30;
+        bvx = rel * 4;
+      }
+      if (by>H) { bx=px+30; by=H-30; bvx=3; bvy=-3; toast('BALL LOST'); }
+
+      bricks.forEach(b => { if (b.alive && bx>b.x && bx<b.x+b.w && by>b.y && by<b.y+b.h) { b.alive=false; bvy*=-1; score+=10; }});
+      const won = bricks.every(b=>!b.alive);
+      if (won) { toast('YOU WIN!'); keys.reset=true; }
+
+      arcadeCtx.fillStyle='#050'; arcadeCtx.fillRect(0,0,W,H);
+      bricks.forEach(b => { if(b.alive) { arcadeCtx.fillStyle=colors[Math.floor((b.y-40)/20)]; arcadeCtx.fillRect(b.x,b.y,b.w,b.h); }});
+      arcadeCtx.fillStyle='#00f0ff'; arcadeCtx.fillRect(px, H-15, 60, 6);
+      arcadeCtx.shadowColor='#fff'; arcadeCtx.shadowBlur=10; arcadeCtx.fillRect(bx-4,by-4,8,8); arcadeCtx.shadowBlur=0;
+      $('arcade-score').textContent = 'SCORE: ' + score;
+    }
+
+    // Mouse/touch on arcade canvas
+    const handleMove = (e) => {
+      const rect = arcadeCanvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (W / rect.width);
+      px = x - 30;
+    };
+    arcadeCanvas.onmousemove = handleMove;
+
+    window.breakoutReady = true;
+    state.arcadeRaf = requestAnimationFrame(update);
+  }
+
+  // Keyboard for breakout
+  const breakoutKeys = {};
+  window.addEventListener('keydown', (e) => {
+    if (state.currentArcade === 'breakout') {
+      breakoutKeys[e.key] = true;
+      keys = breakoutKeys;
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (breakoutKeys.hasOwnProperty(e.key)) breakoutKeys[e.key] = false;
+  });
+  const keys = breakoutKeys;
+
+  // ============================================================
+  // TETRIS
+  // ============================================================
+  function initTetris() {
+    const COLS=10, ROWS=20, BS=18;
+    const W=COLS*BS+120, H=ROWS*BS+40;
+    arcadeCanvas.width=W; arcadeCanvas.height=H;
+
+    const SHAPES = [
+      [[1,1,1,1]], [[1,1],[1,1]], [[1,1,1],[0,1,0]], [[1,1,1],[1,0,0]],
+      [[1,1,1],[0,0,1]], [[0,1,1],[1,1,0]], [[1,1,1],[0,1,0]]
+    ];
+    const COLORS = ['#00f0ff','#faff00','#ff00ff','#00ff9f','#ff6a00','#ff0044','#fff'];
+    let board = Array.from({length:ROWS},()=>Array(COLS).fill(0));
+    let piece = {shape:SHAPES[0], color:COLORS[0], x:3, y:0};
+    let dropTimer=0, score=0, gameOver=false;
+
+    function newPiece() {
+      const s = SHAPES[Math.floor(Math.random()*SHAPES.length)];
+      piece = { shape:s, color:COLORS[SHAPES.indexOf(s)]||COLORS[COLORS.length-1], x:Math.floor(COLS/2)-Math.ceil(s[0].length/2), y:0 };
+      if (collides(piece.shape, piece.x, piece.y)) { gameOver=true; toast('GAME OVER!'); }
+    }
+
+    function collides(shape, px, py) {
+      for(let r=0;r<shape.length;r++) for(let c=0;c<shape[r].length;c++) {
+        if(shape[r][c]) {
+          const nx=px+c, ny=py+r;
+          if(nx<0||nx>=COLS||ny>=ROWS) return true;
+          if(ny>=0 && board[ny][nx]) return true;
+        }
+      }
+      return false;
+    }
+
+    function merge() {
+      piece.shape.forEach((row,r)=>row.forEach((v,c)=> { if(v){ const ny=piece.y+r, nx=piece.x+c; if(ny>=0) board[ny][nx]=piece.color; }}));
+    }
+
+    function clearLines() {
+      let cleared=0;
+      for(let r=ROWS-1;r>=0;r--) {
+        if(board[r].every(c=>c)) { board.splice(r,1); board.unshift(Array(COLS).fill(0)); cleared++; r++; }
+      }
+      score += cleared * 100;
+    }
+
+    function rotate(s) {
+      const r=s.length, c=s[0].length, n=[];
+      for(let i=0;i<c;i++){n[i]=[];for(let j=0;j<r;j++) n[i][j]=s[r-1-j][i];}
+      return n;
+    }
+
+    newPiece();
+
+    window._tetrisHandler = e => {
+      if(gameOver) return;
+      if(e.key==='ArrowLeft'&&!collides(piece.shape,piece.x-1,piece.y)) piece.x--;
+      else if(e.key==='ArrowRight'&&!collides(piece.shape,piece.x+1,piece.y)) piece.x++;
+      else if(e.key==='ArrowDown'&&!collides(piece.shape,piece.x,piece.y+1)) {piece.y++; score+=1;}
+      else if(e.key==='ArrowUp') { const ns=rotate(piece.shape); if(!collides(ns,piece.x,piece.y)) piece.shape=ns; }
+    };
+    window.addEventListener('keydown', window._tetrisHandler);
+
+    function draw() {
+      arcadeCtx.fillStyle='#0a0014'; arcadeCtx.fillRect(0,0,W,H);
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) {
+        if(board[r][c]) { arcadeCtx.fillStyle=board[r][c]; arcadeCtx.fillRect(c*BS+1,r*BS+1,BS-2,BS-2); }
+        arcadeCtx.strokeStyle='rgba(68,0,170,0.3)'; arcadeCtx.strokeRect(c*BS,r*BS,BS,BS);
+      }
+      if(!gameOver) {
+        piece.shape.forEach((row,r)=>row.forEach((v,c)=> {
+          if(v){ arcadeCtx.fillStyle=piece.color; arcadeCtx.shadowColor=piece.color; arcadeCtx.shadowBlur=8; arcadeCtx.fillRect((piece.x+c)*BS+1,(piece.y+r)*BS+1,BS-2,BS-2); arcadeCtx.shadowBlur=0; }
+        }));
+      }
+      arcadeCtx.fillStyle='#fff'; arcadeCtx.font='bold 14px Courier New';
+      arcadeCtx.fillText('NEXT', COLS*BS+15, 30);
+      arcadeCtx.fillStyle='#00f0ff'; arcadeCtx.fillText('SCORE', COLS*BS+15, H-30);
+      arcadeCtx.fillText(score, COLS*BS+15, H-10);
+      $('arcade-score').textContent = 'SCORE: ' + score;
+    }
+
+    function update(ts) {
+      if (!state.currentArcade || state.currentArcade !== 'tetris') {
+        window.removeEventListener('keydown', window._tetrisHandler);
+        return;
+      }
+      state.arcadeRaf = requestAnimationFrame(update);
+      if(gameOver) return;
+      if (ts - dropTimer > 500) {
+        dropTimer = ts;
+        if(!collides(piece.shape, piece.x, piece.y+1)) { piece.y++; score+=1; }
+        else { merge(); clearLines(); newPiece(); }
+      }
+      draw();
+    }
+    state.arcadeRaf = requestAnimationFrame(update);
+    draw();
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  updateStatus('IDLE - LOAD A ROM');
+  toast('RETRO SYSTEM ONLINE');
+})();
+</script>
+</body>
+</html>
